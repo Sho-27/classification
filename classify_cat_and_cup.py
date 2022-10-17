@@ -3,6 +3,8 @@ import numpy as np
 from glob import glob
 from PIL import Image
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 def get_dataset_path():
     return '../datasets/'
@@ -48,7 +50,9 @@ def compile_model(model):
                     metrics = ['accuracy'])
 
 def fit_model(model, train_images, train_labels, epochs):
-    model.fit(train_images, train_labels, epochs = epochs, validation_split = 0.2)
+    history = model.fit(train_images, train_labels, epochs = epochs, validation_split = 0.2)
+    print(history.history.keys())
+    return history.history
 
 def probability_model(model, img):
     probability_model = tf.keras.Sequential([model,
@@ -65,16 +69,33 @@ def inference_res(predictions_res):
         print('This is a CAT.')
     print('===========================')
 
+def check_fit_history(history):
+    acc = history['accuracy']
+    loss = history['loss']
+    epoch = range(1, len(acc) + 1)
+    Figure = plt.figure(figsize = (8, 6))
+    Figure.subplots_adjust(hspace = 0.6, wspace = 0.4)
+    acc_graph = Figure.add_subplot(2, 1, 1, title = 'Accuracy_graph', xlabel = 'Epoch', ylabel = 'Accuracy')
+    loss_graph = Figure.add_subplot(2, 1, 2, title = 'Loss_graph', xlabel = 'Epoch', ylabel = 'Loss')
+    acc_graph.plot(epoch, acc)
+    loss_graph.plot(epoch, loss)
+    acc_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    loss_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    loss_graph.yaxis.set_major_formatter(ticker.FuncFormatter(lambda epoch, loss : '{:,}'.format(int(epoch))))
+    plt.show()
+
 def main():
     train_images, train_labels = mk_train_ds()
     model = def_model()
     compile_model(model)
-    fit_model(model, train_images, train_labels, 20)
+    history = fit_model(model, train_images, train_labels, 20)
 
     img_for_predictions = sys.argv[1]
     img_for_predictions = conv_im_to_numpy(img_for_predictions)
     predictions_res = probability_model(model, img_for_predictions)
     inference_res(predictions_res)
+
+    check_fit_history(history)
 
 if __name__ == '__main__':
     main()
