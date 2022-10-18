@@ -51,7 +51,6 @@ def compile_model(model):
 
 def fit_model(model, train_images, train_labels, epochs):
     history = model.fit(train_images, train_labels, epochs = epochs, validation_split = 0.2)
-    print(history.history.keys())
     return history.history
 
 def probability_model(model, img):
@@ -72,15 +71,23 @@ def inference_res(predictions_res):
 def check_fit_history(history):
     acc = history['accuracy']
     loss = history['loss']
+    val_acc = history['val_accuracy']
+    val_loss = history['val_loss']
     epoch = range(1, len(acc) + 1)
-    Figure = plt.figure(figsize = (8, 6))
-    Figure.subplots_adjust(hspace = 0.6, wspace = 0.4)
-    acc_graph = Figure.add_subplot(2, 1, 1, title = 'Accuracy_graph', xlabel = 'Epoch', ylabel = 'Accuracy')
-    loss_graph = Figure.add_subplot(2, 1, 2, title = 'Loss_graph', xlabel = 'Epoch', ylabel = 'Loss')
+    Figure = plt.figure(figsize = (12, 7))
+    Figure.subplots_adjust(hspace = 0.4, wspace = 0.2)
+    acc_graph = Figure.add_subplot(2, 2, 1, title = 'Accuracy_graph', xlabel = 'Epoch', ylabel = 'Accuracy')
+    loss_graph = Figure.add_subplot(2, 2, 2, title = 'Loss_graph', xlabel = 'Epoch', ylabel = 'Loss')
+    val_acc_graph = Figure.add_subplot(2, 2, 3, title = 'Val_accuracy_graph', xlabel = 'Epoch', ylabel = 'Val_accuracy')
+    val_loss_graph = Figure.add_subplot(2, 2, 4, title = 'Val_loss_graph', xlabel = 'Epoch', ylabel = 'Val_loss')    
     acc_graph.plot(epoch, acc)
     loss_graph.plot(epoch, loss)
-    acc_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
-    loss_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    val_acc_graph.plot(epoch, val_acc)
+    val_loss_graph.plot(epoch, val_loss)
+#    acc_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
+#    loss_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
+#    val_acc_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
+#    val_loss_graph.xaxis.set_major_locator(ticker.MultipleLocator(1))
     loss_graph.yaxis.set_major_formatter(ticker.FuncFormatter(lambda epoch, loss : '{:,}'.format(int(epoch))))
     plt.show()
 
@@ -88,7 +95,7 @@ def main():
     train_images, train_labels = mk_train_ds()
     model = def_model()
     compile_model(model)
-    history = fit_model(model, train_images, train_labels, 20)
+    history = fit_model(model, train_images, train_labels, 100)
 
     img_for_predictions = sys.argv[1]
     img_for_predictions = conv_im_to_numpy(img_for_predictions)
